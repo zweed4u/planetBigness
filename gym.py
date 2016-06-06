@@ -11,9 +11,11 @@ clubLocator=session.get('http://www.planetfitness.com/services/pf/club-locator?l
 print 'Finding all club near you...'
 for clubs in clubLocator.json()['locations']:
 	for info in clubs['properties']:
-		if info=='postalCode' or info=='address':
+		if info=='postalCode':
 			#print info,'::',clubs['properties'][info]
 			pass
+                elif info=='address':
+                        add=clubs['properties'][info]
 		elif info=='label':
 			#print info,'::',clubs['properties'][info]
 			name=clubs['properties'][info]
@@ -25,18 +27,20 @@ for clubs in clubLocator.json()['locations']:
 		elif info=='clubURL':
 			#print info,'::',clubs['properties'][info]
 			url=clubs['properties'][info]
-	data.update({distance:name+'::'+url})
+	data.update({distance:name+'::'+url+'::'+add})
 	#print 
 	#print
 
 print 'Selecting closest location...'
 clubUrl=data[min(float(s) for s in data.keys())].split('::')[1]
 name=data[min(float(s) for s in data.keys())].split('::')[0]
+add=data[min(float(s) for s in data.keys())].split('::')[2]
+
 print clubUrl
 print
 clubPage=session.get(clubUrl)
 soup=BeautifulSoup.BeautifulSoup(clubPage.content)
 hours=str(soup.findAll("div",{"class":"views-field views-field-field-hours"})[0])
-print name,'::',min(float(s) for s in data.keys()),'miles away'
+print name,'::',add,'::',min(float(s) for s in data.keys()),'miles away'
 print hours.split('<div class="field-content">')[1].split('</div> </div>')[0].replace('<br />','\n').replace('&amp;','&')
 print
